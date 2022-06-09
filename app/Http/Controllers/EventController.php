@@ -19,8 +19,8 @@ class EventController extends Controller
     {
 
         //get events by user id
-        $events = event::where('user_id', auth()->id())->get();
-        
+        $events = event::all();
+
         // return $this->getEvents(event::where('user_id',Auth::id())->get());
         return $this->getEvents($events);;
 
