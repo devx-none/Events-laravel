@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Mail\WelcomeMail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -45,14 +46,11 @@ class CreateNewUser implements CreatesNewUsers
         $message = "Bonjour M. " . $input['name'];
         $input = array("body" => $message);
 
-        Mail::send('mail', $input, function ($message) use ($email, $title) {
-            $message->to($email)->subject($title);
+        Mail::to($email)->send(new WelcomeMail($user));
 
-        // Mail::send('mail', $input, function ($message) use ($email, $title) {
-        //     $message->to($email)->subject($title);
-        // });
 
-        });
+
+
 
         return $user;
     }

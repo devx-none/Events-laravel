@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Mail\WelcomeMail;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,3 +30,6 @@ Route::middleware([
 
 
 Route::resource('/events', 'EventController');
+Route::resource('/calendars', 'CalendarController');
+
+

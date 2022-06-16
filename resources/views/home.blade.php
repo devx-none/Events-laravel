@@ -3,8 +3,20 @@
 
 @section('content')
 <div class="row">
+    <div class='mx-auto my-4'>
+        Timezone:
+        <select id='time-zone-selector'>
+            <option value='local'>local</option>
+            <option value='UTC' selected>UTC</option>
+        </select>
+    </div>
+
+
     <div class="col-md-10 mx-auto my-4">
+
+
         <div id='calendar'></div>
+       
 
     </div>
 </div>
@@ -12,8 +24,11 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        var initialTimeZone = 'UTC';
+        var timeZoneSelectorEl = document.getElementById('time-zone-selector');
         var calendarEl = document.getElementById('calendar'); //your dive id of calendar
         var calendar = new FullCalendar.Calendar(calendarEl, {
+            timeZone: initialTimeZone,
             plugins: ['interaction', 'dayGrid'],
             header: {
                 left: 'prevYear,prev,next,nextYear today',
@@ -24,6 +39,12 @@
             navLinks: true, // can click day/week names to navigate views
             editable: true,
             selectable: true,
+            eventTimeFormat: {
+                hour: 'numeric',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            },
+
             select: function(selectionInfo) { //trigger select event
                 let title = prompt("Entrer le titre de l'événement : ");
                 let description = prompt("Entrer la description de l'événement : ");
@@ -169,7 +190,27 @@
                 });
             }
         });
-        calendar.setOption('locale', 'fr');
+
+        FullCalendar.requestJson('GET', 'https://fullcalendar.io/api/demo-feeds/timezones.json', {}, function(timeZones) {
+            timeZones.forEach(function(timeZone) {
+                var optionEl;
+
+                if (timeZone !== 'UTC') { // UTC is already in the list
+                    optionEl = document.createElement('option');
+                    optionEl.value = timeZone;
+                    optionEl.innerText = timeZone;
+                    timeZoneSelectorEl.appendChild(optionEl);
+                }
+            });
+        }, function() {
+            // failure
+
+        });
+        // when the timezone selector changes, dynamically change the calendar option
+        timeZoneSelectorEl.addEventListener('change', function() {
+            calendar.setOption('timeZone', this.value);
+        });
+        // calendar.setOption('locale', 'fr');
         calendar.render();
         document.querySelector('.fc-dayGridMonth-button').innerHTML = "Mois";
         document.querySelector('.fc-dayGridWeek-button').innerHTML = "Semaine";

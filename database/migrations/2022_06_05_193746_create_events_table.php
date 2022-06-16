@@ -23,9 +23,9 @@ class CreateEventsTable extends Migration
             $table->string('textColor')->default('white')->nullable();
             $table->timestamps();
 
-            $table->foreignId('user_id')
+            $table->foreignId('calendar_id')
             ->references('id')
-            ->on('users')
+            ->on('calendars')
             ->onDelete('cascade');
 
         });

@@ -23,6 +23,14 @@ class User extends Authenticatable
      *
      * @var string[]
      */
+
+
+     public function calendar()
+    {
+        return $this->hasMany(calendar::class);
+    }
+
+
     protected $fillable = [
         'name',
         'email',

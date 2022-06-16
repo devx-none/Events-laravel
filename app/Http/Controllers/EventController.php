@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreeventRequest;
 use App\Http\Requests\UpdateeventRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+
 
 class EventController extends Controller
 {
@@ -18,10 +20,11 @@ class EventController extends Controller
     public function index()
     {
 
-        //get events by user id
-        $events = event::all();
-
-        // return $this->getEvents(event::where('user_id',Auth::id())->get());
+        $events = DB::table('events')
+        ->join('calendars', 'events.calendar_id', '=', 'calendars.id')
+        ->join('users', 'calendars.user_id', '=', 'users.id')
+        ->select('events.*', 'calendars.title', 'users.name')
+        ->get();
         return $this->getEvents($events);;
 
 
@@ -78,7 +81,14 @@ class EventController extends Controller
             'title' => 'required',
             'start_date' => 'required',
             'end_date' => 'required',
+
         ]);
+        if(!Gate::allows('create-event', event::class)){
+            return response([
+                'status' => 'error',
+                'message' => 'You are not authorized to create an event'
+            ], 403);
+        }
 
         event::create([
             "title" => $request->title,
@@ -103,6 +113,13 @@ class EventController extends Controller
     public function show($id)
     {
         //
+
+        if(!Gate::allows('view-event', event::class)){
+            return response([
+                'status' => 'error',
+                'message' => 'You are not authorized to view this event'
+            ], 403);
+        }
         $event = event::find($id);
 
         return view('show',['event'=>$event]);
@@ -129,6 +146,12 @@ class EventController extends Controller
     public function update(Request $request, $id)
     {
         //
+        if(!Gate::allows('update-event', event::class)){
+            return response([
+                'status' => 'error',
+                'message' => 'You are not authorized to update this event'
+            ], 403);
+        }
         $event = event::find($id);
         if(!$event){
             return response()->json(['error' => 'Event not found']);
@@ -149,12 +172,20 @@ class EventController extends Controller
     public function destroy($id)
     {
         //
+        $event = event::find($id);
+        if(!Gate::allows('delete-event', event::class)){
+            return response([
+                'status' => 'error',
+                'message' => 'You are not authorized to delete this event'
+            ], 403);
+        }
 
-        $event=event::find($id);
         if(!$event){
             return response()->json(['error' => 'Event not found']);
+        }else{
+            $event->delete();
+            return response()->json(['success' => 'deleted']);
         }
-        $event->delete();
-        return response()->json(['success' => 'deleted']);
+
     }
 }
